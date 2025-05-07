@@ -46,6 +46,26 @@ CREATE TABLE categories (
     parent_id INT
 );
 
+-- Добавление индексов
+-- Основные индексы для первичных ключей (должны быть по умолчанию)
+ALTER TABLE users ADD PRIMARY KEY (id);
+ALTER TABLE orders ADD PRIMARY KEY (id);
+ALTER TABLE products ADD PRIMARY KEY (id);
+ALTER TABLE order_items ADD PRIMARY KEY (id);
+ALTER TABLE categories ADD PRIMARY KEY (id);
+
+-- Индексы для внешних ключей
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX idx_order_items_product_id ON order_items(product_id);
+CREATE INDEX idx_products_category_id ON products(category_id);
+
+-- Индексы для часто используемых условий WHERE
+CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_order_date ON orders(order_date);
+
+
 -- Заполняем таблицы данными
 
 INSERT INTO users (username, email, registration_date, last_login, status, bio)
@@ -101,29 +121,28 @@ FROM generate_series(1, 1000000) i;
 
 
 
--- Запрос 1: полное сканирование с SELECT * и сложными JOIN
+-- Запрос 1: явный выбор полей с оптимизированным JOIN
 EXPLAIN ANALYZE
-SELECT *
+SELECT u.username, o.order_date, o.amount, p.name
 FROM users u
 JOIN orders o ON u.id = o.user_id
 JOIN order_items oi ON o.id = oi.order_id
 JOIN products p ON oi.product_id = p.id
-JOIN categories c ON p.category_id = c.id
 WHERE u.id = 123;
 
 
--- Запрос 2: полное сканирование таблицы без индексов
+-- Запрос 2: выборочное сканирование с учетом индексов
 EXPLAIN ANALYZE
-SELECT * FROM orders WHERE status = 'completed';
+SELECT id, user_id, order_date, amount FROM orders WHERE status = 'completed';
 
 
 
--- Запрос 3: проверка производиельности INSERT без индексов
+-- Запрос 3: проверка производиельности INSERT с индексами
 EXPLAIN ANALYZE
 INSERT INTO orders (user_id, order_date, amount, status)
 VALUES (123, NOW(), 100.00, 'pending');
 
--- Запрос 4: проверка производиельности UPDATE без индексов
+-- Запрос 4: проверка производиельности UPDATE с индексами
 EXPLAIN ANALYZE
 UPDATE orders SET amount = 150.00 WHERE id = 1000;
 
