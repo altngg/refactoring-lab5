@@ -101,11 +101,9 @@ FROM generate_series(1, 1000000) i;
 
 
 
+-- Запрос 1: полное сканирование с SELECT * и сложными JOIN
 EXPLAIN ANALYZE
-SELECT * FROM orders WHERE status = 'completed';
-
-EXPLAIN ANALYZE
-SELECT u.*, o.*, oi.*, p.*, c.*
+SELECT *
 FROM users u
 JOIN orders o ON u.id = o.user_id
 JOIN order_items oi ON o.id = oi.order_id
@@ -113,9 +111,19 @@ JOIN products p ON oi.product_id = p.id
 JOIN categories c ON p.category_id = c.id
 WHERE u.id = 123;
 
+
+-- Запрос 2: полное сканирование таблицы без индексов
+EXPLAIN ANALYZE
+SELECT * FROM orders WHERE status = 'completed';
+
+
+
+-- Запрос 3: проверка производиельности INSERT без индексов
 EXPLAIN ANALYZE
 INSERT INTO orders (user_id, order_date, amount, status)
 VALUES (123, NOW(), 100.00, 'pending');
 
+-- Запрос 4: проверка производиельности UPDATE без индексов
 EXPLAIN ANALYZE
 UPDATE orders SET amount = 150.00 WHERE id = 1000;
+
