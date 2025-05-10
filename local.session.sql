@@ -1,6 +1,6 @@
 
 CREATE TABLE users (
-    id SERIAL,
+    id SERIAL PRIMARY KEY,
     username VARCHAR(100),
     email VARCHAR(255),
     registration_date TIMESTAMP,
@@ -11,7 +11,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE orders (
-    id SERIAL,
+    id SERIAL PRIMARY KEY,
     user_id INT,
     order_date TIMESTAMP,
     amount DECIMAL(10,2),
@@ -22,7 +22,7 @@ CREATE TABLE orders (
 );
 
 CREATE TABLE products (
-    id SERIAL,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(200),
     description TEXT,
     price DECIMAL(10,2),
@@ -32,7 +32,7 @@ CREATE TABLE products (
 );
 
 CREATE TABLE order_items (
-    id SERIAL,
+    id SERIAL PRIMARY KEY,
     order_id INT,
     product_id INT,
     quantity INT,
@@ -40,19 +40,13 @@ CREATE TABLE order_items (
 );
 
 CREATE TABLE categories (
-    id SERIAL,
+    id SERIAL PRIMARY KEY,
     name VARCHAR(100),
     description TEXT,
     parent_id INT
 );
 
 -- Добавление индексов
--- Основные индексы для первичных ключей (должны быть по умолчанию)
-ALTER TABLE users ADD PRIMARY KEY (id);
-ALTER TABLE orders ADD PRIMARY KEY (id);
-ALTER TABLE products ADD PRIMARY KEY (id);
-ALTER TABLE order_items ADD PRIMARY KEY (id);
-ALTER TABLE categories ADD PRIMARY KEY (id);
 
 -- Индексы для внешних ключей
 CREATE INDEX idx_orders_user_id ON orders(user_id);
